@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CLPlayerMaskView.h"
 
 
 @protocol CLPlayerSliderDelegateDelegate <NSObject>

@@ -8,7 +8,6 @@
 
 #import "CLPlayerView.h"
 #import <MediaPlayer/MediaPlayer.h>
-#import "CLPlayerMaskView.h"
 #import "CLGCDTimerManager.h"
 #import "Masonry.h"
 // 播放器的几种状态

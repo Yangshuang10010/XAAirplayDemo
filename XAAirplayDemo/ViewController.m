@@ -10,6 +10,7 @@
 #import "CLPlayerView.h"
 #import "SVProgressHUD.h"
 #import "MYCAirplayManager.h"
+#import "AirControlMaskView.h"
 #import <SystemConfiguration/CaptiveNetwork.h>
 #import <NetworkExtension/NetworkExtension.h>
 #import <CoreLocation/CoreLocation.h>
@@ -20,7 +21,7 @@
 
 static NSString *videoUrl = @"http://v3.cztv.com/cztv/vod/2018/06/28/7c45987529ea410dad7c088ba3b53dac/h264_1500k_mp4.mp4";
 
-@interface ViewController ()<UITableViewDelegate, UITableViewDataSource, MYCAirplayManagerDelegate, CLLocationManagerDelegate, CLPlayerSliderDelegateDelegate>{
+@interface ViewController ()<UITableViewDelegate, UITableViewDataSource, MYCAirplayManagerDelegate, CLLocationManagerDelegate, CLPlayerSliderDelegateDelegate, AirControlMaskViewDelegate>{
     // 当前可投屏设备
     MYCAirplayDevice *_currentDevice;
     //标记是否投屏成功了
@@ -30,6 +31,8 @@ static NSString *videoUrl = @"http://v3.cztv.com/cztv/vod/2018/06/28/7c45987529e
 
 // 播放器
 @property (nonatomic, weak) CLPlayerView *playerView;
+// 播放器投屏时控制蒙层
+@property (nonatomic, strong) AirControlMaskView *maskView;
 // 设备列表
 @property (nonatomic, strong) UITableView  *deviceListView;
 // 设备集合
@@ -42,8 +45,6 @@ static NSString *videoUrl = @"http://v3.cztv.com/cztv/vod/2018/06/28/7c45987529e
 @property (nonatomic, strong) UIButton *fastForwardButton;
 // 定位
 @property (nonatomic, strong) CLLocationManager *locationManager;
-
-
 
 @end
 
@@ -79,6 +80,10 @@ static NSString *videoUrl = @"http://v3.cztv.com/cztv/vod/2018/06/28/7c45987529e
 
 
 #pragma mark ——— view cycle
+-(void)dealloc{
+    [self removeObserver:_maskView.volumeViewSlider forKeyPath:@"value"];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor darkGrayColor];
@@ -139,6 +144,15 @@ static NSString *videoUrl = @"http://v3.cztv.com/cztv/vod/2018/06/28/7c45987529e
     
     // 设备列表
     [self.view addSubview:self.deviceListView];
+    
+    // 投屏时的蒙层
+    _maskView = [[AirControlMaskView alloc]initWithFrame:_playerView.bounds];
+    _maskView.delegate = self;
+    _maskView.hidden = YES;
+    [_playerView addSubview:_maskView];
+    [_maskView configSlider];
+    [_maskView.volumeViewSlider addObserver:self forKeyPath:@"value" options:NSKeyValueObservingOptionNew context:nil];
+    
 }
 
 #pragma mark ——— Action
@@ -152,7 +166,10 @@ static NSString *videoUrl = @"http://v3.cztv.com/cztv/vod/2018/06/28/7c45987529e
 // 停止投屏
 -(void)airPlayStop:(UIButton *)sender{
     [[MYCAirplayManager sharedManager] stop];
+    [[MYCAirplayManager sharedManager] closeSocket];
     [SVProgressHUD showSuccessWithStatus:@"断开连接"];
+    _maskView.hidden = YES;
+    [_maskView resetSlider];
     _airplaying = NO;
 }
 
@@ -317,6 +334,7 @@ static NSString *videoUrl = @"http://v3.cztv.com/cztv/vod/2018/06/28/7c45987529e
         CGFloat dragedSeconds   = total * _playerView.sliderValue;
         [[MYCAirplayManager sharedManager] playVideoOnAirplayDevice:_currentDevice videoUrlStr:url
                                                       startPosition:dragedSeconds];
+        _airplaying = YES;
     }
 }
 
@@ -324,7 +342,6 @@ static NSString *videoUrl = @"http://v3.cztv.com/cztv/vod/2018/06/28/7c45987529e
  设备已经断开后回调此代理
  */
 - (void)MYCAirplayManager:(MYCAirplayManager *)airplayManager selectedDeviceDisconnect:(MYCAirplayDevice *)airplayDevice {
-    NSLog(@"设备已断开---%@",airplayDevice.displayName);
     [SVProgressHUD showWithStatus:[NSString stringWithFormat:@"设备已断开---%@",airplayDevice.displayName]];
 }
 
@@ -334,20 +351,28 @@ static NSString *videoUrl = @"http://v3.cztv.com/cztv/vod/2018/06/28/7c45987529e
  */
 -(void)MYCAirplayManager:(MYCAirplayManager *)airplayManager getPlaybackinfo:(NSDictionary *)playbackInfo
 {
+    // 显示蒙层 配置当前进度条
+    if (_maskView.hidden == YES && _airplaying == YES) {
+        _maskView.hidden = NO;
+        _maskView.playerItem = self.playerView.playerItem;
+        [_maskView configSlider];
+        // 当前播放器暂停
+        [_playerView pausePlay];
+    }
     if (playbackInfo && [playbackInfo isKindOfClass:[NSDictionary class]]) {
         double currentTime = floor([[self stringForKey:@"position" withDictionary:playbackInfo] floatValue]);
         double totalTime = floor([[self stringForKey:@"duration" withDictionary:playbackInfo] floatValue]);
         
-        // 这里实获取到上面👆时间 可以更新播放器进度  具体内容不实现了
-
-//        if (currentTime > 0) {
-        
-//            if (currentTime > 0 && totalTime > 0 && currentTime >= totalTime-1) {
-
-//            }else {
-//                //跳过片头、片尾提示
-//            }
-//        }
+        if (currentTime > 0) {
+            // 更新进度条
+            [NSObject cancelPreviousPerformRequestsWithTarget:self];
+            [_maskView updateSliderWithCurrentTime:currentTime totalTime:totalTime];
+            if (currentTime > 0 && totalTime > 0 && currentTime >= totalTime-1) {
+                // 结尾处理
+            }else {
+                //跳过片头、片尾提示
+            }
+        }
     }
 }
 
@@ -356,23 +381,64 @@ static NSString *videoUrl = @"http://v3.cztv.com/cztv/vod/2018/06/28/7c45987529e
 投屏播放状态更新调此代理
 */
 -(void)MYCAirplayManager:(MYCAirplayManager *)airplayManager getPlaybackStatus:(CLUPnPTransportInfo *)playbackInfo{
-
+    
     if (![self trimEmpty:playbackInfo.currentTransportStatus]) {
         if ([playbackInfo.currentTransportState isEqualToString:@"PLAYING"]) {
+            if (_maskView.playBtn.selected == YES) {
+                _maskView.playBtn.selected = NO;
+            }
             //播放中
-            [self.playerView playVideo];
             _airplaying = YES;
         }else if ([playbackInfo.currentTransportState isEqualToString:@"STOPPED"]){
-            //初始化加载中会返回stopped状态，需要判断_airplaying已经再播放的退出才响应
-            if (_airplaying) {
-                //暂停播放
-                [self.playerView pausePlay];
-                _airplaying = NO;
+            //停止
+            _airplaying = NO;
+            [SVProgressHUD showErrorWithStatus:@"投屏已停止"];
+            //暂停
+            if (_maskView.playBtn.selected == NO) {
+                _maskView.playBtn.selected = YES;
+            }
+            if (_maskView.hidden == NO) {
+                _maskView.hidden = YES;
+            }
+        }else{
+            //暂停
+            if (_maskView.playBtn.selected == NO) {
+                _maskView.playBtn.selected = YES;
             }
         }
     }
 }
 
+
+
+#pragma mark ——— maskViewDelegate
+/**播放按钮代理*/
+- (void)xa_playButtonAction:(UIButton *)button{
+    BOOL isSelected = button.isSelected;
+    if (isSelected) {
+        // 播放
+        [[MYCAirplayManager sharedManager] playVideo];
+    }else{
+        // 暂停
+        [[MYCAirplayManager sharedManager] pauseVideoPlay];
+    }
+}
+
+#pragma mark ——— SliderDelegate
+/**开始滑动*/
+- (void)xa_progressSliderTouchBegan:(CLSlider *)slider{
+//    [_maskView.playBtn setSelected:YES];
+    [[MYCAirplayManager sharedManager] pauseVideoPlay];
+}
+/**滑动中*/
+- (void)xa_progressSliderValueChanged:(CLSlider *)slider{
+    
+}
+/**滑动结束*/
+- (void)xa_progressSliderTouchEnded:(CLSlider *)slider position:(CGFloat)position{
+//    [_maskView.playBtn setSelected:NO];
+    [[MYCAirplayManager sharedManager] seekPlayTime:position];
+}
 
 
 
@@ -420,6 +486,14 @@ static NSString *videoUrl = @"http://v3.cztv.com/cztv/vod/2018/06/28/7c45987529e
     }
 }
 
+#pragma mark ——— kvo
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
+    if ([keyPath isEqualToString:@"value"]) {
+        CGFloat value = [change[NSKeyValueChangeNewKey] floatValue]*100;
+        // 改变音量
+        [[MYCAirplayManager sharedManager] volumeChanged:value];
+    }
+}
 
 
 #pragma mark ——— Extend

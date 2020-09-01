@@ -60,6 +60,7 @@
 		000BFEC524F927A100DAFA12 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 000BFE9824F927A100DAFA12 /* GCDAsyncUdpSocket.m */; };
 		000BFEC624F927A100DAFA12 /* README.markdown in Resources */ = {isa = PBXBuildFile; fileRef = 000BFE9A24F927A100DAFA12 /* README.markdown */; };
 		000BFEC724F927A100DAFA12 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 000BFE9B24F927A100DAFA12 /* LICENSE.txt */; };
+		00446BD424FD084400C33E84 /* AirControlMaskView.m in Sources */ = {isa = PBXBuildFile; fileRef = 00446BD324FD084400C33E84 /* AirControlMaskView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -186,6 +187,8 @@
 		000BFE9924F927A100DAFA12 /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncUdpSocket.h; sourceTree = "<group>"; };
 		000BFE9A24F927A100DAFA12 /* README.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.markdown; sourceTree = "<group>"; };
 		000BFE9B24F927A100DAFA12 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		00446BD224FD084400C33E84 /* AirControlMaskView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AirControlMaskView.h; sourceTree = "<group>"; };
+		00446BD324FD084400C33E84 /* AirControlMaskView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AirControlMaskView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -243,6 +246,8 @@
 				000BFD6B24F926FF00DAFA12 /* SceneDelegate.m */,
 				000BFD6D24F926FF00DAFA12 /* ViewController.h */,
 				000BFD6E24F926FF00DAFA12 /* ViewController.m */,
+				00446BD224FD084400C33E84 /* AirControlMaskView.h */,
+				00446BD324FD084400C33E84 /* AirControlMaskView.m */,
 				000BFD7024F926FF00DAFA12 /* Main.storyboard */,
 				000BFD7324F9270200DAFA12 /* Assets.xcassets */,
 				000BFD7524F9270200DAFA12 /* LaunchScreen.storyboard */,
@@ -286,24 +291,24 @@
 		000BFE3324F927A000DAFA12 /* CLPlayer */ = {
 			isa = PBXGroup;
 			children = (
-				000BFE3424F927A000DAFA12 /* CLGCDTimerManager.h */,
+				000BFE3E24F927A000DAFA12 /* CLSlider.h */,
 				000BFE3524F927A000DAFA12 /* CLSlider.m */,
 				000BFE3624F927A000DAFA12 /* CLPlayerView.h */,
-				000BFE3724F927A000DAFA12 /* UINavigationController+CLPlayerRotation.h */,
-				000BFE3824F927A000DAFA12 /* CLImageHelper.h */,
-				000BFE3924F927A000DAFA12 /* CLRotateAnimationView.h */,
-				000BFE3A24F927A000DAFA12 /* UIViewController+CLPlayerRotation.h */,
-				000BFE3B24F927A000DAFA12 /* UITabBarController+CLPlayerRotation.m */,
-				000BFE3C24F927A000DAFA12 /* CLPlayerMaskView.m */,
-				000BFE3D24F927A000DAFA12 /* UINavigationController+CLPlayerRotation.m */,
-				000BFE3E24F927A000DAFA12 /* CLSlider.h */,
 				000BFE3F24F927A000DAFA12 /* CLPlayerView.m */,
-				000BFE4024F927A000DAFA12 /* CLGCDTimerManager.m */,
-				000BFE4124F927A000DAFA12 /* UIViewController+CLPlayerRotation.m */,
-				000BFE4224F927A000DAFA12 /* CLRotateAnimationView.m */,
+				000BFE3824F927A000DAFA12 /* CLImageHelper.h */,
 				000BFE4324F927A000DAFA12 /* CLImageHelper.m */,
 				000BFE4424F927A000DAFA12 /* CLPlayerMaskView.h */,
+				000BFE3C24F927A000DAFA12 /* CLPlayerMaskView.m */,
+				000BFE3424F927A000DAFA12 /* CLGCDTimerManager.h */,
+				000BFE4024F927A000DAFA12 /* CLGCDTimerManager.m */,
+				000BFE3924F927A000DAFA12 /* CLRotateAnimationView.h */,
+				000BFE4224F927A000DAFA12 /* CLRotateAnimationView.m */,
+				000BFE3724F927A000DAFA12 /* UINavigationController+CLPlayerRotation.h */,
+				000BFE3D24F927A000DAFA12 /* UINavigationController+CLPlayerRotation.m */,
 				000BFE4524F927A000DAFA12 /* UITabBarController+CLPlayerRotation.h */,
+				000BFE3B24F927A000DAFA12 /* UITabBarController+CLPlayerRotation.m */,
+				000BFE3A24F927A000DAFA12 /* UIViewController+CLPlayerRotation.h */,
+				000BFE4124F927A000DAFA12 /* UIViewController+CLPlayerRotation.m */,
 				000BFE4624F927A000DAFA12 /* Resource */,
 			);
 			path = CLPlayer;
@@ -669,6 +674,7 @@
 				000BFEA724F927A100DAFA12 /* ViewController+MASAdditions.m in Sources */,
 				000BFEB324F927A100DAFA12 /* SVIndefiniteAnimatedView.m in Sources */,
 				000BFEA824F927A100DAFA12 /* MASCompositeConstraint.m in Sources */,
+				00446BD424FD084400C33E84 /* AirControlMaskView.m in Sources */,
 				000BFEB024F927A100DAFA12 /* SVRadialGradientLayer.m in Sources */,
 				000BFE9F24F927A100DAFA12 /* UINavigationController+CLPlayerRotation.m in Sources */,
 				000BFEBE24F927A100DAFA12 /* CLUPnPDevice.m in Sources */,

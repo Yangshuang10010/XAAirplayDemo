@@ -237,6 +237,7 @@
     }
     return _slider;
 }
+
 //加载失败按钮
 - (UIButton *) failButton
 {

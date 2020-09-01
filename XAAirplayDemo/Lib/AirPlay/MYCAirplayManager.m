@@ -158,7 +158,6 @@ static MYCAirplayManager*_shardManager;
 - (void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(uint16_t)port
 {
     self.socketIsOnLine = YES;
-
     if(self.delegate != nil && [self.delegate respondsToSelector:@selector(MYCAirplayManager:selectedDeviceOnLine:)])
     {
         [self.delegate MYCAirplayManager:self selectedDeviceOnLine:self.selectedDevice];
